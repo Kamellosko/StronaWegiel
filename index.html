@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDSNIBVm6ScAxaF1cEQPR7q8Mt0VvPbQM&libraries=places&language=pl" defer></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -308,6 +309,14 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(100px); background:var(--graphite); color:var(--white); padding:.875rem 1.5rem; border-radius:6px; font-size:.9rem; font-weight:500; border-left:3px solid var(--ember); z-index:500; transition:transform .3s cubic-bezier(.4,0,.2,1); white-space:nowrap; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 .toast.error { border-left-color:var(--red); }
+.delivery-info-box { padding:1rem 1.25rem; border-radius:6px; font-size:.875rem; line-height:1.6; }
+.delivery-info-box.free { background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3); color:#22c55e; }
+.delivery-info-box.paid { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); color:#f59e0b; }
+.delivery-info-box.call { background:rgba(232,92,13,.1); border:1px solid rgba(232,92,13,.3); color:#e85c0d; }
+.delivery-info-box strong { display:block; font-size:1rem; margin-bottom:.25rem; }
+.delivery-calculating { color:var(--ash); font-size:.85rem; display:flex; align-items:center; gap:.5rem; margin-top:.5rem; }
+.delivery-spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,.15); border-top-color:var(--ember); border-radius:50%; animation:spin2 .8s linear infinite; display:inline-block; }
+@keyframes spin2 { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -480,7 +489,8 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 
       <div class="form-group" id="addressGroup" style="display:none">
         <label class="form-label">Adres dostawy <span class="req">*</span></label>
-        <input class="form-input" type="text" id="faddress" placeholder="ul. Przykładowa 1, 00-000 Miejscowość">
+        <input class="form-input" type="text" id="faddress" placeholder="Zacznij wpisywać adres..." autocomplete="off">
+        <div id="deliveryInfo" style="display:none;margin-top:.75rem;"></div>
       </div>
 
       <div class="form-group">
@@ -543,7 +553,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
         <div class="sidebar-info">
           <div class="sidebar-info-item"><span class="sidebar-info-icon">📞</span>Po złożeniu zamówienia skontaktujemy się z Tobą telefonicznie w ciągu 24 godzin roboczych.</div>
           <div class="sidebar-info-item"><span class="sidebar-info-icon">💰</span>Ceny są orientacyjne. Ostateczna cena zostanie potwierdzona telefonicznie.</div>
-          <div class="sidebar-info-item"><span class="sidebar-info-icon">🚛</span>Koszt dostawy zostanie doliczony po ustaleniu odległości.</div>
+          <div class="sidebar-info-item"><span class="sidebar-info-icon">🚛</span><span id="deliveryCostInfo">Koszt dostawy zostanie obliczony po wpisaniu adresu.</span></div>
           <div class="sidebar-info-item"><span class="sidebar-info-icon">↩️</span>Masz 14 dni na odstąpienie od umowy (konsumenci).</div>
         </div>
       </div>
@@ -749,6 +759,89 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 <div class="toast" id="toast"></div>
 
 <script>
+  // ── GOOGLE MAPS AUTOCOMPLETE + KALKULATOR DOSTAWY ──
+  const SHOP_ADDRESS = 'Dalachów 8, 46-325 Dalachów, Polska';
+  let autocomplete = null;
+  let deliveryCost = 0;
+  let deliveryDistance = 0;
+  let deliveryOk = true;
+
+  function initAutocomplete() {
+    const input = document.getElementById('faddress');
+    if (!input || !window.google) return;
+    autocomplete = new google.maps.places.Autocomplete(input, {
+      componentRestrictions: { country: 'pl' },
+      fields: ['formatted_address', 'geometry'],
+      types: ['address']
+    });
+    autocomplete.addListener('place_changed', onPlaceSelected);
+  }
+
+  function onPlaceSelected() {
+    const place = autocomplete.getPlace();
+    if (!place.geometry) return;
+    calculateDelivery(place.formatted_address);
+  }
+
+  function calculateDelivery(address) {
+    const infoEl = document.getElementById('deliveryInfo');
+    infoEl.style.display = 'block';
+    infoEl.innerHTML = '<div class="delivery-calculating"><span class="delivery-spinner"></span> Obliczam odległość...</div>';
+    document.getElementById('deliveryCostInfo').textContent = 'Obliczam koszt dostawy...';
+
+    const service = new google.maps.DistanceMatrixService();
+    service.getDistanceMatrix({
+      origins: [SHOP_ADDRESS],
+      destinations: [address],
+      travelMode: google.maps.TravelMode.DRIVING,
+      unitSystem: google.maps.UnitSystem.METRIC,
+      language: 'pl'
+    }, (response, status) => {
+      if (status !== 'OK') {
+        infoEl.innerHTML = '<div class="delivery-info-box call"><strong>⚠️ Nie udało się obliczyć odległości</strong>Wpisz adres ręcznie lub zadzwoń: <a href="tel:+48694232935" style="color:inherit">694 232 935</a></div>';
+        return;
+      }
+      const element = response.rows[0].elements[0];
+      if (element.status !== 'OK') {
+        infoEl.innerHTML = '<div class="delivery-info-box call"><strong>⚠️ Nie znaleziono trasy</strong>Zadzwoń aby ustalić dostawę: <a href="tel:+48694232935" style="color:inherit">694 232 935</a></div>';
+        return;
+      }
+
+      const distanceKm = element.distance.value / 1000;
+      const durationText = element.duration.text;
+      deliveryDistance = Math.round(distanceKm);
+
+      if (distanceKm <= 30) {
+        deliveryCost = 0;
+        deliveryOk = true;
+        infoEl.innerHTML = `<div class="delivery-info-box free"><strong>🚛 Dostawa GRATIS!</strong>Odległość: ${deliveryDistance} km (${durationText}) — w strefie darmowej dostawy.</div>`;
+        document.getElementById('deliveryCostInfo').textContent = `Dostawa gratis — ${deliveryDistance} km od składu.`;
+      } else if (distanceKm <= 75) {
+        deliveryCost = 50;
+        deliveryOk = true;
+        infoEl.innerHTML = `<div class="delivery-info-box paid"><strong>🚛 Koszt dostawy: 50 zł</strong>Odległość: ${deliveryDistance} km (${durationText}) — strefa 31–75 km.</div>`;
+        document.getElementById('deliveryCostInfo').textContent = `Dostawa 50 zł — ${deliveryDistance} km od składu.`;
+      } else if (distanceKm <= 100) {
+        deliveryCost = 100;
+        deliveryOk = true;
+        infoEl.innerHTML = `<div class="delivery-info-box paid"><strong>🚛 Koszt dostawy: 100 zł</strong>Odległość: ${deliveryDistance} km (${durationText}) — strefa 76–100 km.</div>`;
+        document.getElementById('deliveryCostInfo').textContent = `Dostawa 100 zł — ${deliveryDistance} km od składu.`;
+      } else {
+        deliveryCost = 0;
+        deliveryOk = false;
+        infoEl.innerHTML = `<div class="delivery-info-box call"><strong>📞 Dostawa powyżej 100 km</strong>Odległość: ${deliveryDistance} km (${durationText}). Zadzwoń aby ustalić indywidualny koszt dostawy lub umówić odbiór własny.<br><br><a href="tel:+48694232935" style="color:inherit;font-weight:700;">📞 694 232 935</a></div>`;
+        document.getElementById('deliveryCostInfo').textContent = `${deliveryDistance} km — ustal dostawę telefonicznie.`;
+      }
+      renderCart();
+    });
+  }
+
+  // Inicjalizuj autocomplete gdy Google Maps się załaduje
+  window.addEventListener('load', () => {
+    if (window.google) initAutocomplete();
+    else setTimeout(initAutocomplete, 2000);
+  });
+
   // ── JSONBIN CONFIG ──
   const BIN_ID = '6a2f1e03da38895dfec05031';
   const API_KEY = '$2a$10$S9R1CV15r/RHVRd3cLH51uK13u3a./U/Jlj33qlFos4IN9TC1Xcyy';
@@ -887,10 +980,19 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
         <div class="summary-line">
           <span>${item.icon} ${item.name} ×${item.qty} ${item.unit}</span>
           <span>${(item.qty*item.price).toLocaleString('pl-PL')} zł</span>
-        </div>`).join('') + `
+        </div>`).join('') +
+        (deliveryCost > 0 ? `
+        <div class="summary-line">
+          <span>🚛 Dostawa (${deliveryDistance} km)</span>
+          <span>${deliveryCost} zł</span>
+        </div>` : deliveryDistance > 0 ? `
+        <div class="summary-line" style="color:var(--green)">
+          <span>🚛 Dostawa (${deliveryDistance} km)</span>
+          <span>GRATIS</span>
+        </div>` : '') + `
         <div class="summary-line total">
           <span>Razem (bez dostawy)</span>
-          <span>${totalPrice.toLocaleString('pl-PL')} zł</span>
+          <span>${(totalPrice + deliveryCost).toLocaleString('pl-PL')} zł</span>
         </div>
         <div class="summary-line" style="font-size:.75rem;color:var(--ash);margin-top:.25rem;">
           <span>* Ceny orientacyjne — zostaną potwierdzone telefonicznie</span>
@@ -912,7 +1014,14 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
   // ── FORM LOGIC ──
   function toggleAddressField() {
     const val = document.getElementById('fdelivery').value;
-    document.getElementById('addressGroup').style.display = val === 'Dostawa pod adres' ? 'flex' : 'none';
+    const group = document.getElementById('addressGroup');
+    group.style.display = val === 'Dostawa pod adres' ? 'flex' : 'none';
+    if (val === 'Dostawa pod adres') {
+      deliveryCost = 0; deliveryDistance = 0; deliveryOk = true;
+      document.getElementById('deliveryInfo').style.display = 'none';
+      setTimeout(initAutocomplete, 100);
+    }
+    renderCart();
   }
 
   // ── ORDER SUBMIT ──
@@ -932,6 +1041,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
     if (!email || !email.includes('@')) { showToast('Podaj poprawny adres e-mail.','error'); return; }
     if (!delivery) { showToast('Wybierz sposób odbioru.','error'); return; }
     if (delivery === 'Dostawa pod adres' && !address) { showToast('Podaj adres dostawy.','error'); return; }
+    if (delivery === 'Dostawa pod adres' && !deliveryOk) { showToast('Dostawa powyżej 100 km — zadzwoń aby ustalić szczegóły.','error'); return; }
     if (Object.keys(cart).length === 0) { showToast('Dodaj produkty do koszyka.','error'); return; }
     if (!document.getElementById('consent1').checked) { showToast('Zaakceptuj Regulamin.','error'); return; }
     if (!document.getElementById('consent2').checked) { showToast('Zaakceptuj zgodę RODO.','error'); return; }
@@ -957,7 +1067,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
       payment_method: payment,
       invoice_needed: invoice,
       cart_items: cartText,
-      cart_total: totalPrice.toLocaleString('pl-PL') + ' zł (orientacyjnie, bez dostawy)',
+      cart_total: totalPrice.toLocaleString('pl-PL') + ' zł (produkty) + ' + (deliveryCost > 0 ? deliveryCost + ' zł (dostawa)' : (delivery === 'Dostawa pod adres' ? 'dostawa GRATIS' : 'odbiór własny')),
       notes: notes || 'Brak uwag',
       to_email: 'fhuliradjagskladopalu@gmail.com',
       reply_to: email,
@@ -986,6 +1096,9 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
     ['fname','fphone','femail','faddress','fnip','fnotes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
     document.getElementById('fdelivery').value = '';
     document.getElementById('addressGroup').style.display = 'none';
+    deliveryCost = 0; deliveryDistance = 0; deliveryOk = true;
+    document.getElementById('deliveryInfo').style.display = 'none';
+    document.getElementById('deliveryCostInfo').textContent = 'Koszt dostawy zostanie obliczony po wpisaniu adresu.';
     ['consent1','consent2','consent3'].forEach(id => document.getElementById(id).checked = false);
     btn.disabled = false;
     btn.textContent = '✔ Złóż zamówienie';
