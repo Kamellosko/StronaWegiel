@@ -190,10 +190,10 @@ input:checked + .slider::before { transform: translateX(28px); }
   const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
   const PRODUCTS = [
-    { id: 'pellet',   name: 'Pellet drzewny',   icon: '🌿' },
-    { id: 'kamienny', name: 'Węgiel kamienny',   icon: '⚫' },
-    { id: 'groszek',  name: 'Eko-groszek',       icon: '🔥' },
-    { id: 'brykiet',  name: 'Brykiet drzewny',   icon: '🪵' },
+    { id: 'pellet',   name: 'Pellet drzewny',   icon: '🌿', unit: 'paleta (1050 kg)' },
+    { id: 'kamienny', name: 'Węgiel kamienny',   icon: '⚫', unit: 'tona' },
+    { id: 'groszek',  name: 'Eko-groszek',       icon: '🔥', unit: 'tona' },
+    { id: 'brykiet',  name: 'Brykiet drzewny',   icon: '🪵', unit: 'tona' },
   ];
 
   let currentData = {};
@@ -246,10 +246,10 @@ input:checked + .slider::before { transform: translateX(28px); }
             <div class="product-row-id">ID: ${p.id}</div>
           </div>
           <div class="price-group">
-            <div class="price-label">Cena (zł/tona)</div>
+            <div class="price-label">Cena (zł / ${p.unit})</div>
             <div class="price-input-wrap">
               <input class="price-input" type="number" id="price-${p.id}" value="${data.cena}" min="0" step="1">
-              <span class="price-unit">zł/t</span>
+              <span class="price-unit">zł</span>
             </div>
           </div>
           <div class="toggle-group">
