@@ -350,7 +350,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
   <div class="trust-item"><span class="trust-icon">🚛</span> Dostawa na terenie okolic</div>
   <div class="trust-item"><span class="trust-icon">💳</span> Przelew lub gotówka</div>
   <div class="trust-item"><span class="trust-icon">📞</span> Potwierdzenie telefoniczne</div>
-  <div class="trust-item"><span class="trust-icon">✅</span> Faktura VAT na życzenie</div>
+  <div class="trust-item"><span class="trust-icon">✅</span> Faktura VAT</div>
   <div class="trust-item"><span class="trust-icon">🔒</span> Bezpieczne zamówienie</div>
 </div>
 
@@ -513,7 +513,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">Czy wystawiacie fakturę VAT? <span class="faq-arrow">+</span></button>
-      <div class="faq-a">Tak, wystawiamy fakturę VAT na życzenie. Zaznacz tę potrzebę w uwagach do zamówienia lub powiedz nam o tym podczas rozmowy telefonicznej.</div>
+      <div class="faq-a">Tak, do każdego zamówienia wystawiamy fakturę VAT. Jeśli potrzebujesz faktury na firmę, wpisz NIP w formularzu zamówienia.</div>
     </div>
 
     <div class="faq-item">
@@ -591,16 +591,8 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
       </div>
 
       <div class="form-group">
-        <label class="form-label">Czy potrzebna faktura VAT?</label>
-        <select class="form-select" id="finvoice">
-          <option value="Nie">Nie, dziękuję</option>
-          <option value="Tak">Tak, proszę o fakturę VAT</option>
-        </select>
-      </div>
-
-      <div class="form-group" id="nipGroup" style="display:none">
-        <label class="form-label">NIP firmy</label>
-        <input class="form-input" type="text" id="fnip" placeholder="0000000000">
+        <label class="form-label">NIP firmy <span style="color:var(--ash);font-weight:400;text-transform:none;letter-spacing:0">(opcjonalnie — tylko jeśli potrzebujesz faktury na firmę)</span></label>
+        <input class="form-input" type="text" id="fnip" placeholder="Zostaw puste jeśli nie potrzebujesz faktury na firmę">
       </div>
 
       <div class="form-group">
@@ -817,14 +809,14 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
       <li>Adres e-mail</li>
       <li>Numer telefonu</li>
       <li>Adres dostawy (jeśli podany)</li>
-      <li>NIP (jeśli potrzebna faktura)</li>
+      <li>NIP firmy (jeśli faktura na firmę)</li>
     </ul>
     <h2>3. W jakim celu przetwarzamy dane</h2>
     <p>Twoje dane przetwarzamy wyłącznie w celu:</p>
     <ul>
       <li>Realizacji zamówienia (podstawa: art. 6 ust. 1 lit. b RODO — wykonanie umowy)</li>
       <li>Kontaktu w sprawie zamówienia</li>
-      <li>Wystawienia faktury VAT (jeśli wymagana)</li>
+      <li>Wystawienia faktury VAT</li>
       <li>Wypełnienia obowiązków prawnych (np. rachunkowych)</li>
     </ul>
     <h2>4. Jak długo przechowujemy dane</h2>
@@ -935,10 +927,6 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
     document.getElementById('addressGroup').style.display = val === 'Dostawa pod adres' ? 'flex' : 'none';
   }
 
-  document.getElementById('finvoice').addEventListener('change', function() {
-    document.getElementById('nipGroup').style.display = this.value === 'Tak' ? 'flex' : 'none';
-  });
-
   // ── ORDER SUBMIT ──
   async function submitOrder() {
     const name = document.getElementById('fname').value.trim();
@@ -947,8 +935,8 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
     const delivery = document.getElementById('fdelivery').value;
     const address = document.getElementById('faddress').value.trim();
     const payment = document.querySelector('input[name=payment]:checked').value;
-    const invoice = document.getElementById('finvoice').value;
     const nip = document.getElementById('fnip').value.trim();
+    const invoice = nip ? `Faktura na firmę, NIP: ${nip}` : 'Brak (paragon)';
     const notes = document.getElementById('fnotes').value.trim();
 
     if (!name) { showToast('Podaj imię i nazwisko.','error'); return; }
@@ -979,7 +967,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
       delivery_method: delivery,
       delivery_address: delivery === 'Dostawa pod adres' ? address : 'Odbiór własny – Dalachów 8',
       payment_method: payment,
-      invoice_needed: invoice === 'Tak' ? `Tak (NIP: ${nip || 'nie podano'})` : 'Nie',
+      invoice_needed: invoice,
       cart_items: cartText,
       cart_total: totalPrice.toLocaleString('pl-PL') + ' zł (orientacyjnie, bez dostawy)',
       notes: notes || 'Brak uwag',
@@ -1009,9 +997,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
     renderCart();
     ['fname','fphone','femail','faddress','fnip','fnotes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
     document.getElementById('fdelivery').value = '';
-    document.getElementById('finvoice').value = 'Nie';
     document.getElementById('addressGroup').style.display = 'none';
-    document.getElementById('nipGroup').style.display = 'none';
     ['consent1','consent2','consent3'].forEach(id => document.getElementById(id).checked = false);
     btn.disabled = false;
     btn.textContent = '✔ Złóż zamówienie';
