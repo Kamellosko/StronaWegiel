@@ -754,16 +754,16 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
   const API_KEY = '$2a$10$S9R1CV15r/RHVRd3cLH51uK13u3a./U/Jlj33qlFos4IN9TC1Xcyy';
 
   const PRODUCTS_DEF = [
-    { id:'pellet',   name:'Pellet drzewny',  icon:'🌿', badge:'POLECANY',
-      desc:'Certyfikowany pellet drzewny ENplus A1. Wysoka wartość opałowa, niskie emisje. Dostępny w workach 15 kg lub luzem na palecie.',
-      specs:[['Frakcja','6–8 mm'],['Opakowanie','worki 15 kg / paleta']] },
-    { id:'kamienny', name:'Węgiel kamienny', icon:'⚫', badge:null,
+    { id:'pellet',   name:'Pellet drzewny',  icon:'🌿', badge:'POLECANY', unit:'paleta', unitShort:'pal.',
+      desc:'Certyfikowany pellet drzewny ENplus A1. Wysoka wartość opałowa, niskie emisje. 1 paleta = ok. 1050 kg worków 15 kg.',
+      specs:[['Frakcja','6–8 mm'],['Opakowanie','worki 15 kg na palecie'],['Waga palety','ok. 1050 kg']] },
+    { id:'kamienny', name:'Węgiel kamienny', icon:'⚫', badge:null, unit:'tona', unitShort:'t',
       desc:'Węgiel kamienny orzech/kostka. Wysoka kaloryczność, długie palenie. Odpowiedni do kotłów zasypowych i kominków.',
       specs:[['Frakcja','orzech / kostka'],['Opakowanie','luz']] },
-    { id:'groszek',  name:'Eko-groszek',     icon:'🔥', badge:null,
+    { id:'groszek',  name:'Eko-groszek',     icon:'🔥', badge:null, unit:'tona', unitShort:'t',
       desc:'Drobnoziarnisty węgiel do kotłów automatycznych z podajnikiem. Niskie zasiarcowanie, bardzo dobra sprawność spalania.',
       specs:[['Frakcja','5–25 mm'],['Opakowanie','luz / big bag']] },
-    { id:'brykiet',  name:'Brykiet drzewny', icon:'🪵', badge:null,
+    { id:'brykiet',  name:'Brykiet drzewny', icon:'🪵', badge:null, unit:'tona', unitShort:'t',
       desc:'Brykiet RUF ze sprasowanego drewna. Bezchlorowy, bez kory. Do kominków, pieców i kotłów na paliwa stałe.',
       specs:[['Typ','RUF / Pini Kay'],['Opakowanie','worki / paleta']] },
   ];
@@ -777,7 +777,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
       renderProducts(json.record);
     } catch(e) {
       // Fallback — pokaż produkty ze stanem domyślnym
-      const fallback = { pellet:{dostepny:true,cena:1299}, kamienny:{dostepny:true,cena:1150}, groszek:{dostepny:true,cena:1050}, brykiet:{dostepny:true,cena:890} };
+      const fallback = { pellet:{dostepny:true,cena:1365}, kamienny:{dostepny:true,cena:1150}, groszek:{dostepny:true,cena:1050}, brykiet:{dostepny:true,cena:890} };
       renderProducts(fallback);
     }
   }
@@ -801,18 +801,18 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
             ${available ? '● Dostępny' : '● Niedostępny'}
           </div>
           <div class="product-price">${cena.toLocaleString('pl-PL')} zł</div>
-          <div class="product-unit">/ tona brutto (cena orientacyjna)</div>
-          <div class="product-min">Min. zamówienie: 1 tona</div>
+          <div class="product-unit">/ ${p.unit} brutto (cena orientacyjna)</div>
+          <div class="product-min">Min. zamówienie: 1 ${p.unit}</div>
           ${available ? `
           <div class="product-qty">
-            <span class="qty-label">Ilość (t)</span>
+            <span class="qty-label">Ilość (${p.unitShort})</span>
             <div class="qty-controls">
               <button class="qty-btn" onclick="changeQty('${p.id}',-1)">−</button>
               <input class="qty-input" type="number" id="qty-${p.id}" value="1" min="1" max="99">
               <button class="qty-btn" onclick="changeQty('${p.id}',1)">+</button>
             </div>
           </div>
-          <button class="add-to-cart" onclick="addToCart('${p.id}','${p.name}',${cena},'${p.icon}','tona')">+ Dodaj do koszyka</button>
+          <button class="add-to-cart" onclick="addToCart('${p.id}','${p.name}',${cena},'${p.icon}','${p.unit}')">+ Dodaj do koszyka</button>
           ` : `
           <div class="unavailable-msg">Produkt chwilowo niedostępny.<br>Zadzwoń aby zapytać o termin dostawy.</div>
           <a href="tel:+48694232935" class="btn-primary" style="text-align:center;margin-top:auto;">📞 Zadzwoń: 694 232 935</a>
@@ -885,7 +885,7 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 
       sidebarEl.innerHTML = items.map(([,item]) => `
         <div class="summary-line">
-          <span>${item.icon} ${item.name} ×${item.qty}t</span>
+          <span>${item.icon} ${item.name} ×${item.qty} ${item.unit}</span>
           <span>${(item.qty*item.price).toLocaleString('pl-PL')} zł</span>
         </div>`).join('') + `
         <div class="summary-line total">
