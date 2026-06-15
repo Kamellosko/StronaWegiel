@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwwlCL0b3dFDICXge93NL7xDbBjdsaZfM&libraries=places&language=pl" defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwwlCL0b3dFDICXge93NL7xDbBjdsaZfM&libraries=places&language=pl&v=weekly" defer></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -769,11 +769,16 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
   function initAutocomplete() {
     const input = document.getElementById('faddress');
     if (!input || !window.google) return;
+    // Usuń poprzedni autocomplete jeśli istnieje
+    if (autocomplete) google.maps.event.clearInstanceListeners(autocomplete);
     autocomplete = new google.maps.places.Autocomplete(input, {
       componentRestrictions: { country: 'pl' },
       fields: ['formatted_address', 'geometry'],
-      types: ['address']
+      types: ['address'],
+      language: 'pl'
     });
+    // Blokuj submit formularza przy Enter w polu adresu
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
     autocomplete.addListener('place_changed', onPlaceSelected);
   }
 
