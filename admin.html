@@ -184,10 +184,8 @@ input:checked + .slider::before { transform: translateX(28px); }
 
 <script>
   // ── CONFIG ──
-  const BIN_ID = '6a2f1e03da38895dfec05031';
-  const API_KEY = '$2a$10$S9R1CV15r/RHVRd3cLH51uK13u3a./U/Jlj33qlFos4IN9TC1Xcyy';
-  const ADMIN_PASSWORD = 'liradjag2025'; // ← ZMIEŃ NA SWOJE HASŁO
-  const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+  const WORKER_URL = 'https://liradjag-api.fhuliradjagskladopalu.workers.dev';
+  const ADMIN_PASSWORD = 'liradjag2025'; // ← TO HASŁO JEST JUŻ UKRYTE W CLOUDFLARE
 
   const PRODUCTS = [
     { id: 'pellet',   name: 'Pellet drzewny',   icon: '🌿', unit: 'paleta (1050 kg)' },
@@ -221,11 +219,8 @@ input:checked + .slider::before { transform: translateX(28px); }
   async function loadData() {
     showLoading(true);
     try {
-      const res = await fetch(API_URL + '/latest', {
-        headers: { 'X-Master-Key': API_KEY }
-      });
-      const json = await res.json();
-      currentData = json.record;
+      const res = await fetch(`${WORKER_URL}/produkty`);
+      currentData = await res.json();
       renderProducts();
     } catch(e) {
       showStatus('Błąd połączenia z bazą danych. Sprawdź internet.', 'error');
@@ -289,11 +284,11 @@ input:checked + .slider::before { transform: translateX(28px); }
     });
 
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(`${WORKER_URL}/produkty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': API_KEY
+          'X-Admin-Password': ADMIN_PASSWORD
         },
         body: JSON.stringify(newData)
       });
