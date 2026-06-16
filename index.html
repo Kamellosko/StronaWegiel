@@ -8,10 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-  ({key: "AIzaSyAwwlCL0b3dFDICXge93NL7xDbBjdsaZfM", v: "weekly", language: "pl"});
-</script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -320,6 +316,22 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 .delivery-calculating { color:var(--ash); font-size:.85rem; display:flex; align-items:center; gap:.5rem; margin-top:.5rem; }
 .delivery-spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,.15); border-top-color:var(--ember); border-radius:50%; animation:spin2 .8s linear infinite; display:inline-block; }
 @keyframes spin2 { to { transform:rotate(360deg); } }
+.address-wrapper { position:relative; width:100%; }
+.address-suggestions {
+  position:absolute; top:100%; left:0; right:0; z-index:999;
+  background:var(--graphite); border:1px solid rgba(255,255,255,.15);
+  border-top:none; border-radius:0 0 4px 4px;
+  max-height:220px; overflow-y:auto;
+}
+.address-suggestion {
+  padding:.75rem 1rem; font-size:.875rem; color:var(--cream);
+  cursor:pointer; border-bottom:1px solid rgba(255,255,255,.05);
+  transition:background .15s;
+}
+.address-suggestion:hover { background:var(--ash); }
+.address-suggestion:last-child { border-bottom:none; }
+.address-suggestion-main { font-weight:600; }
+.address-suggestion-sub { font-size:.75rem; color:var(--smoke); margin-top:.15rem; }
 </style>
 </head>
 <body>
@@ -492,7 +504,10 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 
       <div class="form-group" id="addressGroup" style="display:none">
         <label class="form-label">Adres dostawy <span class="req">*</span></label>
-        <input class="form-input" type="text" id="faddress" placeholder="Zacznij wpisywać adres..." autocomplete="off">
+        <div class="address-wrapper">
+          <input class="form-input" type="text" id="faddress" placeholder="Zacznij wpisywać adres..." autocomplete="off" oninput="onAddressInput(this.value)">
+          <div class="address-suggestions" id="addressSuggestions" style="display:none"></div>
+        </div>
         <div id="deliveryInfo" style="display:none;margin-top:.75rem;"></div>
       </div>
 
@@ -762,99 +777,91 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── GOOGLE MAPS AUTOCOMPLETE + KALKULATOR DOSTAWY ──
-  const SHOP_ADDRESS = 'Dalachów 8, 46-325 Dalachów, Polska';
+  // ── NOMINATIM AUTOCOMPLETE + KALKULATOR DOSTAWY ──
+  const SHOP_LAT = 51.0801;
+  const SHOP_LNG = 18.5856;
   let deliveryCost = 0;
   let deliveryDistance = 0;
   let deliveryOk = true;
+  let searchTimeout = null;
 
-  async function initAutocomplete() {
-    const input = document.getElementById('faddress');
-    if (!input || !window.google) return;
-
-    const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
-
-    // Stwórz nowy element autocomplete
-    const autocompleteEl = new PlaceAutocompleteElement({
-      componentRestrictions: { country: 'pl' },
-      language: 'pl'
-    });
-
-    // Stylizuj i wstaw w miejsce inputa
-    input.parentNode.insertBefore(autocompleteEl, input);
-    input.style.display = 'none';
-
-    // Skopiuj style na nowy element
-    autocompleteEl.style.cssText = `
-      width:100%; display:block;
-    `;
-    const innerInput = autocompleteEl.querySelector('input');
-    if (innerInput) {
-      innerInput.className = 'form-input';
-      innerInput.placeholder = 'Zacznij wpisywać adres...';
-      innerInput.style.cssText = 'width:100%;padding:.75rem 1rem;background:#1a1a1a;color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:4px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;';
-    }
-
-    autocompleteEl.addEventListener('gmp-placeselect', async (e) => {
-      const place = e.placePrediction.toPlace();
-      await place.fetchFields({ fields: ['displayName', 'formattedAddress'] });
-      const addr = place.formattedAddress;
-      input.value = addr;
-      calculateDelivery(addr);
-    });
+  async function onAddressInput(val) {
+    const sugEl = document.getElementById('addressSuggestions');
+    if (val.length < 3) { sugEl.style.display = 'none'; return; }
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&countrycodes=pl&format=json&addressdetails=1&limit=5`, {
+          headers: { 'Accept-Language': 'pl', 'User-Agent': 'LIRADJAG-sklep/1.0' }
+        });
+        const data = await res.json();
+        if (!data.length) { sugEl.style.display = 'none'; return; }
+        sugEl.innerHTML = data.map(item => {
+          const main = item.address.road
+            ? `${item.address.road || ''}${item.address.house_number ? ' ' + item.address.house_number : ''}`
+            : item.display_name.split(',')[0];
+          const sub = [item.address.city || item.address.town || item.address.village, item.address.postcode].filter(Boolean).join(', ');
+          return `<div class="address-suggestion" onclick="selectAddress('${item.display_name.replace(/'/g,"\\'")}', ${item.lat}, ${item.lon})">
+            <div class="address-suggestion-main">${main}</div>
+            <div class="address-suggestion-sub">${sub}</div>
+          </div>`;
+        }).join('');
+        sugEl.style.display = 'block';
+      } catch(e) {
+        sugEl.style.display = 'none';
+      }
+    }, 400);
   }
 
-  function calculateDelivery(address) {
+  function selectAddress(fullAddress, lat, lng) {
+    document.getElementById('faddress').value = fullAddress;
+    document.getElementById('addressSuggestions').style.display = 'none';
+    calculateDelivery(parseFloat(lat), parseFloat(lng), fullAddress);
+  }
+
+  function calculateDelivery(lat, lng, address) {
     const infoEl = document.getElementById('deliveryInfo');
     infoEl.style.display = 'block';
     infoEl.innerHTML = '<div class="delivery-calculating"><span class="delivery-spinner"></span> Obliczam odległość...</div>';
     document.getElementById('deliveryCostInfo').textContent = 'Obliczam koszt dostawy...';
 
-    const service = new google.maps.DistanceMatrixService();
-    service.getDistanceMatrix({
-      origins: [SHOP_ADDRESS],
-      destinations: [address],
-      travelMode: google.maps.TravelMode.DRIVING,
-      unitSystem: google.maps.UnitSystem.METRIC,
-      language: 'pl'
-    }, (response, status) => {
-      if (status !== 'OK') {
-        infoEl.innerHTML = '<div class="delivery-info-box call"><strong>⚠️ Nie udało się obliczyć odległości</strong>Zadzwoń: <a href="tel:+48694232935" style="color:inherit">694 232 935</a></div>';
-        return;
-      }
-      const element = response.rows[0].elements[0];
-      if (element.status !== 'OK') {
-        infoEl.innerHTML = '<div class="delivery-info-box call"><strong>⚠️ Nie znaleziono trasy</strong>Zadzwoń: <a href="tel:+48694232935" style="color:inherit">694 232 935</a></div>';
-        return;
-      }
+    // Oblicz odległość w linii prostej (Haversine) — wystarczająco dokładne
+    const R = 6371;
+    const dLat = (lat - SHOP_LAT) * Math.PI / 180;
+    const dLng = (lng - SHOP_LNG) * Math.PI / 180;
+    const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+              Math.cos(SHOP_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*
+              Math.sin(dLng/2)*Math.sin(dLng/2);
+    const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    // Dodaj 20% bo droga jest dłuższa niż linia prosta
+    const distanceKm = Math.round(R * c * 1.2);
+    deliveryDistance = distanceKm;
 
-      const distanceKm = element.distance.value / 1000;
-      const durationText = element.duration.text;
-      deliveryDistance = Math.round(distanceKm);
-
-      if (distanceKm <= 30) {
-        deliveryCost = 0; deliveryOk = true;
-        infoEl.innerHTML = `<div class="delivery-info-box free"><strong>🚛 Dostawa GRATIS!</strong>Odległość: ${deliveryDistance} km (${durationText}) — w strefie darmowej dostawy.</div>`;
-        document.getElementById('deliveryCostInfo').textContent = `Dostawa gratis — ${deliveryDistance} km od składu.`;
-      } else if (distanceKm <= 75) {
-        deliveryCost = 50; deliveryOk = true;
-        infoEl.innerHTML = `<div class="delivery-info-box paid"><strong>🚛 Koszt dostawy: 50 zł</strong>Odległość: ${deliveryDistance} km (${durationText}) — strefa 31–75 km.</div>`;
-        document.getElementById('deliveryCostInfo').textContent = `Dostawa 50 zł — ${deliveryDistance} km od składu.`;
-      } else if (distanceKm <= 100) {
-        deliveryCost = 100; deliveryOk = true;
-        infoEl.innerHTML = `<div class="delivery-info-box paid"><strong>🚛 Koszt dostawy: 100 zł</strong>Odległość: ${deliveryDistance} km (${durationText}) — strefa 76–100 km.</div>`;
-        document.getElementById('deliveryCostInfo').textContent = `Dostawa 100 zł — ${deliveryDistance} km od składu.`;
-      } else {
-        deliveryCost = 0; deliveryOk = false;
-        infoEl.innerHTML = `<div class="delivery-info-box call"><strong>📞 Dostawa powyżej 100 km</strong>Odległość: ${deliveryDistance} km (${durationText}). Zadzwoń aby ustalić koszt.<br><br><a href="tel:+48694232935" style="color:inherit;font-weight:700;">📞 694 232 935</a></div>`;
-        document.getElementById('deliveryCostInfo').textContent = `${deliveryDistance} km — ustal dostawę telefonicznie.`;
-      }
-      renderCart();
-    });
+    if (distanceKm <= 30) {
+      deliveryCost = 0; deliveryOk = true;
+      infoEl.innerHTML = `<div class="delivery-info-box free"><strong>🚛 Dostawa GRATIS!</strong>Szacowana odległość: ok. ${distanceKm} km — w strefie darmowej dostawy.</div>`;
+      document.getElementById('deliveryCostInfo').textContent = `Dostawa gratis — ok. ${distanceKm} km od składu.`;
+    } else if (distanceKm <= 75) {
+      deliveryCost = 50; deliveryOk = true;
+      infoEl.innerHTML = `<div class="delivery-info-box paid"><strong>🚛 Koszt dostawy: 50 zł</strong>Szacowana odległość: ok. ${distanceKm} km — strefa 31–75 km.</div>`;
+      document.getElementById('deliveryCostInfo').textContent = `Dostawa 50 zł — ok. ${distanceKm} km od składu.`;
+    } else if (distanceKm <= 100) {
+      deliveryCost = 100; deliveryOk = true;
+      infoEl.innerHTML = `<div class="delivery-info-box paid"><strong>🚛 Koszt dostawy: 100 zł</strong>Szacowana odległość: ok. ${distanceKm} km — strefa 76–100 km.</div>`;
+      document.getElementById('deliveryCostInfo').textContent = `Dostawa 100 zł — ok. ${distanceKm} km od składu.`;
+    } else {
+      deliveryCost = 0; deliveryOk = false;
+      infoEl.innerHTML = `<div class="delivery-info-box call"><strong>📞 Dostawa powyżej 100 km</strong>Szacowana odległość: ok. ${distanceKm} km. Zadzwoń aby ustalić indywidualny koszt dostawy.<br><br><a href="tel:+48694232935" style="color:inherit;font-weight:700;">📞 694 232 935</a></div>`;
+      document.getElementById('deliveryCostInfo').textContent = `Ok. ${distanceKm} km — ustal dostawę telefonicznie.`;
+    }
+    renderCart();
   }
 
-  window.addEventListener('load', () => {
-    setTimeout(initAutocomplete, 500);
+  // Zamknij podpowiedzi po kliknięciu poza
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.address-wrapper')) {
+      document.getElementById('addressSuggestions').style.display = 'none';
+    }
   });
 
   // ── JSONBIN CONFIG ──
@@ -1034,7 +1041,8 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
     if (val === 'Dostawa pod adres') {
       deliveryCost = 0; deliveryDistance = 0; deliveryOk = true;
       document.getElementById('deliveryInfo').style.display = 'none';
-      setTimeout(initAutocomplete, 200);
+      document.getElementById('addressSuggestions').style.display = 'none';
+      document.getElementById('faddress').value = '';
     }
     renderCart();
   }
