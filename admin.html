@@ -185,7 +185,7 @@ input:checked + .slider::before { transform: translateX(28px); }
 <script>
   // ── CONFIG ──
   const WORKER_URL = 'https://liradjag-api.fhuliradjagskladopalu.workers.dev';
-  const ADMIN_PASSWORD = 'liradjag2025'; // ← TO HASŁO JEST JUŻ UKRYTE W CLOUDFLARE
+  let sessionToken = null;
 
   const PRODUCTS = [
     { id: 'pellet',   name: 'Pellet drzewny',   icon: '🌿', unit: 'paleta (1050 kg)' },
@@ -197,16 +197,33 @@ input:checked + .slider::before { transform: translateX(28px); }
   let currentData = {};
 
   // ── LOGIN ──
-  function login() {
+  async function login() {
     const pass = document.getElementById('passwordInput').value;
-    if (pass === ADMIN_PASSWORD) {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('adminPanel').style.display = 'flex';
-      loadData();
-    } else {
+    const btn = document.querySelector('.login-btn');
+    btn.textContent = 'Logowanie...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${WORKER_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        sessionToken = data.token;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'flex';
+        loadData();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+      }
+    } catch(e) {
+      document.getElementById('loginError').textContent = 'Błąd połączenia. Sprawdź internet.';
       document.getElementById('loginError').style.display = 'block';
-      document.getElementById('passwordInput').value = '';
     }
+    btn.textContent = 'Zaloguj się';
+    btn.disabled = false;
   }
 
   function logout() {
@@ -288,7 +305,7 @@ input:checked + .slider::before { transform: translateX(28px); }
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': ADMIN_PASSWORD
+          'X-Session-Token': sessionToken
         },
         body: JSON.stringify(newData)
       });
