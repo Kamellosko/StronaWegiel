@@ -867,6 +867,21 @@ footer { background:var(--black); border-top:1px solid rgba(255,255,255,.06); pa
   // ── CLOUDFLARE WORKER CONFIG ──
   const WORKER_URL = 'https://liradjag-api.fhuliradjagskladopalu.workers.dev';
 
+  const PRODUCTS_DEF = [
+    { id:'pellet',   name:'Pellet drzewny',  icon:'🌿', badge:'POLECANY', unit:'paleta', unitShort:'pal.',
+      desc:'Certyfikowany pellet drzewny ENplus A1. Wysoka wartość opałowa, niskie emisje. 1 paleta = ok. 1050 kg worków 15 kg.',
+      specs:[['Frakcja','6–8 mm'],['Opakowanie','worki 15 kg na palecie'],['Waga palety','ok. 1050 kg']] },
+    { id:'kamienny', name:'Węgiel kamienny', icon:'⚫', badge:null, unit:'tona', unitShort:'t',
+      desc:'Węgiel kamienny orzech/kostka. Wysoka kaloryczność, długie palenie. Odpowiedni do kotłów zasypowych i kominków.',
+      specs:[['Frakcja','orzech / kostka'],['Opakowanie','luz']] },
+    { id:'groszek',  name:'Eko-groszek',     icon:'🔥', badge:null, unit:'tona', unitShort:'t',
+      desc:'Drobnoziarnisty węgiel do kotłów automatycznych z podajnikiem. Niskie zasiarcowanie, bardzo dobra sprawność spalania.',
+      specs:[['Frakcja','5–25 mm'],['Opakowanie','luz / big bag']] },
+    { id:'brykiet',  name:'Brykiet drzewny', icon:'🪵', badge:null, unit:'tona', unitShort:'t',
+      desc:'Brykiet RUF ze sprasowanego drewna. Bezchlorowy, bez kory. Do kominków, pieców i kotłów na paliwa stałe.',
+      specs:[['Typ','RUF / Pini Kay'],['Opakowanie','worki / paleta']] },
+  ];
+
   async function loadProducts() {
     try {
       const res = await fetch(`${WORKER_URL}/produkty`);
