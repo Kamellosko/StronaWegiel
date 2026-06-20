@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admina – LIRADJAG</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Arial', sans-serif; background: #0f0f0f; color: #f4f0e8; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* LOGIN */
+#loginScreen {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+}
+.login-box {
+  background: #1a1a1a; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px; padding: 3rem 2.5rem; width: 380px; text-align: center;
+}
+.login-logo { font-size: 1.8rem; font-weight: 900; letter-spacing: .1em; color: #fff; margin-bottom: .5rem; }
+.login-logo span { color: #e85c0d; }
+.login-sub { font-size: .85rem; color: #8a8a8a; margin-bottom: 2rem; }
+.login-label { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8a8a8a; margin-bottom: .5rem; text-align: left; }
+.login-input {
+  width: 100%; padding: .85rem 1rem; background: #2c2c2c; color: #fff;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: 1rem;
+  outline: none; margin-bottom: 1.25rem; transition: border-color .2s;
+}
+.login-input:focus { border-color: #e85c0d; }
+.login-btn {
+  width: 100%; padding: .9rem; background: #e85c0d; color: #fff;
+  border: none; border-radius: 4px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background .2s; letter-spacing: .05em;
+}
+.login-btn:hover { background: #c94d09; }
+.login-error { color: #ef4444; font-size: .85rem; margin-top: .75rem; display: none; }
+
+/* ADMIN PANEL */
+#adminPanel { display: none; flex-direction: column; min-height: 100vh; }
+.admin-nav {
+  background: #1a1a1a; border-bottom: 1px solid rgba(255,255,255,.07);
+  padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between;
+}
+.admin-nav-logo { font-size: 1.2rem; font-weight: 900; letter-spacing: .08em; }
+.admin-nav-logo span { color: #e85c0d; }
+.admin-nav-right { display: flex; align-items: center; gap: 1rem; }
+.admin-nav-label { font-size: .8rem; color: #8a8a8a; }
+.logout-btn {
+  background: #2c2c2c; color: #f4f0e8; border: 1px solid rgba(255,255,255,.1);
+  padding: .4rem 1rem; border-radius: 4px; cursor: pointer; font-size: .85rem;
+  transition: background .2s;
+}
+.logout-btn:hover { background: #3c3c3c; }
+
+.admin-content { flex: 1; padding: 2.5rem 2rem; max-width: 900px; margin: 0 auto; width: 100%; }
+.admin-title { font-size: 1.5rem; font-weight: 900; letter-spacing: .05em; margin-bottom: .4rem; }
+.admin-desc { font-size: .875rem; color: #8a8a8a; margin-bottom: 2.5rem; }
+
+.product-row {
+  background: #1a1a1a; border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px; padding: 1.5rem 2rem; margin-bottom: 1rem;
+  display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 1.5rem;
+}
+@media(max-width:640px) { .product-row { grid-template-columns: 1fr 1fr; gap: 1rem; } }
+.product-row-icon { font-size: 2.2rem; }
+.product-row-info {}
+.product-row-name { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: .2rem; }
+.product-row-id { font-size: .75rem; color: #4a4a4a; letter-spacing: .08em; text-transform: uppercase; }
+
+.price-group { display: flex; flex-direction: column; gap: .4rem; }
+.price-label { font-size: .7rem; color: #8a8a8a; letter-spacing: .08em; text-transform: uppercase; }
+.price-input-wrap { display: flex; align-items: center; gap: .4rem; }
+.price-input {
+  width: 100px; padding: .6rem .75rem; background: #2c2c2c; color: #fff;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: 1rem;
+  font-weight: 700; outline: none; transition: border-color .2s;
+}
+.price-input:focus { border-color: #e85c0d; }
+.price-unit { font-size: .8rem; color: #8a8a8a; }
+
+/* TOGGLE SWITCH */
+.toggle-group { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+.toggle-label-text { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
+.toggle-label-text.on { color: #22c55e; }
+.toggle-label-text.off { color: #ef4444; }
+.toggle { position: relative; display: inline-block; width: 56px; height: 28px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: #ef4444; border-radius: 28px; transition: .3s;
+}
+.slider::before {
+  content: ''; position: absolute; height: 20px; width: 20px;
+  left: 4px; bottom: 4px; background: #fff; border-radius: 50%; transition: .3s;
+}
+input:checked + .slider { background: #22c55e; }
+input:checked + .slider::before { transform: translateX(28px); }
+
+.save-bar {
+  position: sticky; bottom: 0; background: #0f0f0f;
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.save-info { font-size: .85rem; color: #8a8a8a; }
+.save-btn {
+  background: #e85c0d; color: #fff; border: none; padding: .85rem 2.5rem;
+  border-radius: 4px; font-size: 1rem; font-weight: 700; cursor: pointer;
+  letter-spacing: .05em; transition: background .2s, transform .15s;
+  display: flex; align-items: center; gap: .6rem;
+}
+.save-btn:hover { background: #c94d09; transform: translateY(-1px); }
+.save-btn:disabled { background: #4a4a4a; cursor: not-allowed; transform: none; }
+
+.status-msg {
+  padding: .75rem 1.25rem; border-radius: 4px; font-size: .9rem; font-weight: 600;
+  display: none; margin-left: auto;
+}
+.status-msg.success { background: rgba(34,197,94,.15); color: #22c55e; border: 1px solid rgba(34,197,94,.3); display: block; }
+.status-msg.error { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.3); display: block; }
+
+.link-to-shop { color: #e85c0d; text-decoration: none; font-size: .85rem; }
+.link-to-shop:hover { text-decoration: underline; }
+
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; font-size: 1.1rem; color: #fff; gap: .75rem;
+}
+.spinner {
+  width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.2);
+  border-top-color: #e85c0d; border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div> Ładowanie...
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">LIRA<span>DJAG</span></div>
+    <div class="login-sub">Panel zarządzania produktami</div>
+    <label class="login-label">Hasło admina</label>
+    <input class="login-input" type="password" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') login()">
+    <button class="login-btn" onclick="login()">Zaloguj się</button>
+    <div class="login-error" id="loginError">Nieprawidłowe hasło. Spróbuj ponownie.</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <nav class="admin-nav">
+    <div class="admin-nav-logo">LIRA<span>DJAG</span> · Panel Admina</div>
+    <div class="admin-nav-right">
+      <span class="admin-nav-label">Zalogowany jako: Robert Gajda</span>
+      <button class="logout-btn" onclick="logout()">Wyloguj</button>
+      <a href="index.html" target="_blank" class="link-to-shop">→ Strona sklepu</a>
+    </div>
+  </nav>
+
+  <div class="admin-content">
+    <div class="admin-title">Zarządzanie produktami</div>
+    <div class="admin-desc">Zmiany są widoczne dla klientów natychmiast po kliknięciu "Zapisz zmiany".</div>
+
+    <div id="productRows">
+      <!-- Generowane przez JS -->
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <div class="save-info">Pamiętaj aby zapisać zmiany przed zamknięciem strony.</div>
+    <span class="status-msg" id="statusMsg"></span>
+    <button class="save-btn" id="saveBtn" onclick="saveChanges()">
+      💾 Zapisz zmiany
+    </button>
+  </div>
+</div>
+
+<script>
+  // ── CONFIG ──
+  const WORKER_URL = 'https://liradjag-api.fhuliradjagskladopalu.workers.dev';
+  let sessionToken = null;
+
+  const PRODUCTS = [
+    { id: 'pellet',   name: 'Pellet drzewny',   icon: '🌿', unit: 'paleta (1050 kg)' },
+    { id: 'kamienny', name: 'Węgiel kamienny',   icon: '⚫', unit: 'tona' },
+    { id: 'groszek',  name: 'Eko-groszek',       icon: '🔥', unit: 'tona' },
+    { id: 'brykiet',  name: 'Brykiet drzewny',   icon: '🪵', unit: 'tona' },
+  ];
+
+  let currentData = {};
+
+  // ── LOGIN ──
+  async function login() {
+    const pass = document.getElementById('passwordInput').value;
+    const btn = document.querySelector('.login-btn');
+    btn.textContent = 'Logowanie...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${WORKER_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        sessionToken = data.token;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'flex';
+        loadData();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+      }
+    } catch(e) {
+      document.getElementById('loginError').textContent = 'Błąd połączenia. Sprawdź internet.';
+      document.getElementById('loginError').style.display = 'block';
+    }
+    btn.textContent = 'Zaloguj się';
+    btn.disabled = false;
+  }
+
+  function logout() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('passwordInput').value = '';
+  }
+
+  // ── LOAD DATA ──
+  async function loadData() {
+    showLoading(true);
+    try {
+      const res = await fetch(`${WORKER_URL}/produkty`);
+      currentData = await res.json();
+      renderProducts();
+    } catch(e) {
+      showStatus('Błąd połączenia z bazą danych. Sprawdź internet.', 'error');
+    }
+    showLoading(false);
+  }
+
+  // ── RENDER ──
+  function renderProducts() {
+    const container = document.getElementById('productRows');
+    container.innerHTML = PRODUCTS.map(p => {
+      const data = currentData[p.id] || { dostepny: true, cena: 0 };
+      return `
+        <div class="product-row">
+          <div class="product-row-icon">${p.icon}</div>
+          <div class="product-row-info">
+            <div class="product-row-name">${p.name}</div>
+            <div class="product-row-id">ID: ${p.id}</div>
+          </div>
+          <div class="price-group">
+            <div class="price-label">Cena (zł / ${p.unit})</div>
+            <div class="price-input-wrap">
+              <input class="price-input" type="number" id="price-${p.id}" value="${data.cena}" min="0" step="1">
+              <span class="price-unit">zł</span>
+            </div>
+          </div>
+          <div class="toggle-group">
+            <div class="toggle-label-text ${data.dostepny ? 'on' : 'off'}" id="label-${p.id}">
+              ${data.dostepny ? '● DOSTĘPNY' : '● NIEDOSTĘPNY'}
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-${p.id}" ${data.dostepny ? 'checked' : ''} onchange="updateLabel('${p.id}')">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateLabel(id) {
+    const checked = document.getElementById('toggle-' + id).checked;
+    const label = document.getElementById('label-' + id);
+    label.textContent = checked ? '● DOSTĘPNY' : '● NIEDOSTĘPNY';
+    label.className = 'toggle-label-text ' + (checked ? 'on' : 'off');
+  }
+
+  // ── SAVE ──
+  async function saveChanges() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Zapisuję...';
+    showStatus('', '');
+
+    const newData = {};
+    PRODUCTS.forEach(p => {
+      newData[p.id] = {
+        dostepny: document.getElementById('toggle-' + p.id).checked,
+        cena: parseInt(document.getElementById('price-' + p.id).value) || 0
+      };
+    });
+
+    try {
+      const res = await fetch(`${WORKER_URL}/produkty`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-Token': sessionToken
+        },
+        body: JSON.stringify(newData)
+      });
+
+      if (res.ok) {
+        currentData = newData;
+        showStatus('✅ Zmiany zapisane! Strona klientów zaktualizowana.', 'success');
+      } else {
+        showStatus('❌ Błąd zapisu. Spróbuj ponownie.', 'error');
+      }
+    } catch(e) {
+      showStatus('❌ Błąd połączenia. Sprawdź internet.', 'error');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '💾 Zapisz zmiany';
+    setTimeout(() => showStatus('', ''), 4000);
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg' + (type ? ' ' + type : '');
+  }
+
+  function showLoading(show) {
+    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+  }
+
+  // Auto-hide loading on start
+  document.getElementById('loadingOverlay').style.display = 'none';
+</script>
+</body>
+</html>
