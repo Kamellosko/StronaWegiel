@@ -8,140 +8,103 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Arial', sans-serif; background: #0f0f0f; color: #f4f0e8; min-height: 100vh; display: flex; flex-direction: column; }
 
-/* LOGIN */
-#loginScreen {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-}
-.login-box {
-  background: #1a1a1a; border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px; padding: 3rem 2.5rem; width: 380px; text-align: center;
-}
+#loginScreen { flex: 1; display: flex; align-items: center; justify-content: center; }
+.login-box { background: #1a1a1a; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 3rem 2.5rem; width: 380px; text-align: center; }
 .login-logo { font-size: 1.8rem; font-weight: 900; letter-spacing: .1em; color: #fff; margin-bottom: .5rem; }
 .login-logo span { color: #e85c0d; }
 .login-sub { font-size: .85rem; color: #8a8a8a; margin-bottom: 2rem; }
 .login-label { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8a8a8a; margin-bottom: .5rem; text-align: left; }
-.login-input {
-  width: 100%; padding: .85rem 1rem; background: #2c2c2c; color: #fff;
-  border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: 1rem;
-  outline: none; margin-bottom: 1.25rem; transition: border-color .2s;
-}
+.login-input { width: 100%; padding: .85rem 1rem; background: #2c2c2c; color: #fff; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: 1rem; outline: none; margin-bottom: 1.25rem; transition: border-color .2s; }
 .login-input:focus { border-color: #e85c0d; }
-.login-btn {
-  width: 100%; padding: .9rem; background: #e85c0d; color: #fff;
-  border: none; border-radius: 4px; font-size: 1rem; font-weight: 700;
-  cursor: pointer; transition: background .2s; letter-spacing: .05em;
-}
+.login-btn { width: 100%; padding: .9rem; background: #e85c0d; color: #fff; border: none; border-radius: 4px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background .2s; letter-spacing: .05em; }
 .login-btn:hover { background: #c94d09; }
 .login-error { color: #ef4444; font-size: .85rem; margin-top: .75rem; display: none; }
 
-/* ADMIN PANEL */
 #adminPanel { display: none; flex-direction: column; min-height: 100vh; }
-.admin-nav {
-  background: #1a1a1a; border-bottom: 1px solid rgba(255,255,255,.07);
-  padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between;
-}
+.admin-nav { background: #1a1a1a; border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
 .admin-nav-logo { font-size: 1.2rem; font-weight: 900; letter-spacing: .08em; }
 .admin-nav-logo span { color: #e85c0d; }
 .admin-nav-right { display: flex; align-items: center; gap: 1rem; }
 .admin-nav-label { font-size: .8rem; color: #8a8a8a; }
-.logout-btn {
-  background: #2c2c2c; color: #f4f0e8; border: 1px solid rgba(255,255,255,.1);
-  padding: .4rem 1rem; border-radius: 4px; cursor: pointer; font-size: .85rem;
-  transition: background .2s;
-}
+.logout-btn { background: #2c2c2c; color: #f4f0e8; border: 1px solid rgba(255,255,255,.1); padding: .4rem 1rem; border-radius: 4px; cursor: pointer; font-size: .85rem; transition: background .2s; }
 .logout-btn:hover { background: #3c3c3c; }
-
-.admin-content { flex: 1; padding: 2.5rem 2rem; max-width: 900px; margin: 0 auto; width: 100%; }
-.admin-title { font-size: 1.5rem; font-weight: 900; letter-spacing: .05em; margin-bottom: .4rem; }
-.admin-desc { font-size: .875rem; color: #8a8a8a; margin-bottom: 2.5rem; }
-
-.product-row {
-  background: #1a1a1a; border: 1px solid rgba(255,255,255,.08);
-  border-radius: 8px; padding: 1.5rem 2rem; margin-bottom: 1rem;
-  display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 1.5rem;
-}
-@media(max-width:640px) { .product-row { grid-template-columns: 1fr 1fr; gap: 1rem; } }
-.product-row-icon { font-size: 2.2rem; }
-.product-row-info {}
-.product-row-name { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: .2rem; }
-.product-row-id { font-size: .75rem; color: #4a4a4a; letter-spacing: .08em; text-transform: uppercase; }
-
-.price-group { display: flex; flex-direction: column; gap: .4rem; }
-.price-label { font-size: .7rem; color: #8a8a8a; letter-spacing: .08em; text-transform: uppercase; }
-.price-input-wrap { display: flex; align-items: center; gap: .4rem; }
-.price-input {
-  width: 100px; padding: .6rem .75rem; background: #2c2c2c; color: #fff;
-  border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: 1rem;
-  font-weight: 700; outline: none; transition: border-color .2s;
-}
-.price-input:focus { border-color: #e85c0d; }
-.price-unit { font-size: .8rem; color: #8a8a8a; }
-
-/* TOGGLE SWITCH */
-.toggle-group { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
-.toggle-label-text { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
-.toggle-label-text.on { color: #22c55e; }
-.toggle-label-text.off { color: #ef4444; }
-.toggle { position: relative; display: inline-block; width: 56px; height: 28px; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute; cursor: pointer; inset: 0;
-  background: #ef4444; border-radius: 28px; transition: .3s;
-}
-.slider::before {
-  content: ''; position: absolute; height: 20px; width: 20px;
-  left: 4px; bottom: 4px; background: #fff; border-radius: 50%; transition: .3s;
-}
-input:checked + .slider { background: #22c55e; }
-input:checked + .slider::before { transform: translateX(28px); }
-
-.save-bar {
-  position: sticky; bottom: 0; background: #0f0f0f;
-  border-top: 1px solid rgba(255,255,255,.08);
-  padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; flex-wrap: wrap;
-}
-.save-info { font-size: .85rem; color: #8a8a8a; }
-.save-btn {
-  background: #e85c0d; color: #fff; border: none; padding: .85rem 2.5rem;
-  border-radius: 4px; font-size: 1rem; font-weight: 700; cursor: pointer;
-  letter-spacing: .05em; transition: background .2s, transform .15s;
-  display: flex; align-items: center; gap: .6rem;
-}
-.save-btn:hover { background: #c94d09; transform: translateY(-1px); }
-.save-btn:disabled { background: #4a4a4a; cursor: not-allowed; transform: none; }
-
-.status-msg {
-  padding: .75rem 1.25rem; border-radius: 4px; font-size: .9rem; font-weight: 600;
-  display: none; margin-left: auto;
-}
-.status-msg.success { background: rgba(34,197,94,.15); color: #22c55e; border: 1px solid rgba(34,197,94,.3); display: block; }
-.status-msg.error { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.3); display: block; }
-
 .link-to-shop { color: #e85c0d; text-decoration: none; font-size: .85rem; }
 .link-to-shop:hover { text-decoration: underline; }
 
-.loading-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.7);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 999; font-size: 1.1rem; color: #fff; gap: .75rem;
-}
-.spinner {
-  width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.2);
-  border-top-color: #e85c0d; border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
+.admin-content { flex: 1; padding: 2.5rem 2rem; max-width: 960px; margin: 0 auto; width: 100%; }
+.admin-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+.admin-title { font-size: 1.5rem; font-weight: 900; letter-spacing: .05em; margin-bottom: .4rem; }
+.admin-desc { font-size: .875rem; color: #8a8a8a; }
+.add-btn { background: #e85c0d; color: #fff; border: none; border-radius: 6px; padding: .7rem 1.4rem; font-size: .9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: .5rem; white-space: nowrap; transition: background .2s, transform .15s; }
+.add-btn:hover { background: #c94d09; transform: translateY(-1px); }
+
+.product-row { background: #1a1a1a; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: .75rem; display: grid; grid-template-columns: 2.5rem 1fr auto auto auto; align-items: center; gap: 1.25rem; }
+@media(max-width:640px) { .product-row { grid-template-columns: 2.5rem 1fr; gap: .75rem; } }
+.product-icon { font-size: 2rem; line-height: 1; }
+.product-info-name { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: .15rem; }
+.product-info-meta { font-size: .72rem; color: #555; letter-spacing: .06em; text-transform: uppercase; }
+
+.price-group { display: flex; flex-direction: column; gap: .3rem; }
+.price-label { font-size: .68rem; color: #8a8a8a; letter-spacing: .08em; text-transform: uppercase; }
+.price-input-wrap { display: flex; align-items: center; gap: .4rem; }
+.price-input { width: 90px; padding: .55rem .7rem; background: #2c2c2c; color: #fff; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: .95rem; font-weight: 700; outline: none; transition: border-color .2s; }
+.price-input:focus { border-color: #e85c0d; }
+.price-unit { font-size: .78rem; color: #8a8a8a; }
+
+.toggle-group { display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+.toggle-label-text { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; white-space: nowrap; }
+.toggle-label-text.on { color: #22c55e; }
+.toggle-label-text.off { color: #ef4444; }
+.toggle { position: relative; display: inline-block; width: 52px; height: 26px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background: #ef4444; border-radius: 26px; transition: .3s; }
+.slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 4px; bottom: 4px; background: #fff; border-radius: 50%; transition: .3s; }
+input:checked + .slider { background: #22c55e; }
+input:checked + .slider::before { transform: translateX(26px); }
+
+.delete-btn { background: transparent; border: 1px solid rgba(239,68,68,.3); color: #ef4444; border-radius: 4px; padding: .5rem .8rem; cursor: pointer; font-size: .8rem; transition: all .2s; white-space: nowrap; }
+.delete-btn:hover { background: rgba(239,68,68,.12); border-color: #ef4444; }
+
+.save-bar { position: sticky; bottom: 0; background: #0f0f0f; border-top: 1px solid rgba(255,255,255,.08); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.save-info { font-size: .85rem; color: #8a8a8a; }
+.save-btn { background: #e85c0d; color: #fff; border: none; padding: .85rem 2.5rem; border-radius: 4px; font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: .05em; transition: background .2s, transform .15s; display: flex; align-items: center; gap: .6rem; }
+.save-btn:hover { background: #c94d09; transform: translateY(-1px); }
+.save-btn:disabled { background: #4a4a4a; cursor: not-allowed; transform: none; }
+
+.status-msg { padding: .75rem 1.25rem; border-radius: 4px; font-size: .9rem; font-weight: 600; display: none; }
+.status-msg.success { background: rgba(34,197,94,.15); color: #22c55e; border: 1px solid rgba(34,197,94,.3); display: block; }
+.status-msg.error { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.3); display: block; }
+
+.loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; z-index: 999; font-size: 1.1rem; color: #fff; gap: .75rem; }
+.spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.2); border-top-color: #e85c0d; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* MODAL */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal { background: #1a1a1a; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 2rem; width: 100%; max-width: 480px; }
+.modal-title { font-size: 1.2rem; font-weight: 900; margin-bottom: 1.5rem; }
+.field { margin-bottom: 1.1rem; }
+.field label { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8a8a8a; margin-bottom: .4rem; }
+.field input, .field select { width: 100%; padding: .7rem 1rem; background: #2c2c2c; color: #fff; border: 1px solid rgba(255,255,255,.1); border-radius: 4px; font-size: .95rem; outline: none; transition: border-color .2s; }
+.field input:focus, .field select:focus { border-color: #e85c0d; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.modal-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
+.btn-cancel { background: #2c2c2c; color: #f4f0e8; border: 1px solid rgba(255,255,255,.1); padding: .7rem 1.4rem; border-radius: 4px; cursor: pointer; font-size: .9rem; font-weight: 700; transition: background .2s; }
+.btn-cancel:hover { background: #3c3c3c; }
+.btn-confirm { background: #e85c0d; color: #fff; border: none; padding: .7rem 1.4rem; border-radius: 4px; cursor: pointer; font-size: .9rem; font-weight: 700; transition: background .2s; }
+.btn-confirm:hover { background: #c94d09; }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: #555; }
+.empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state-text { font-size: .9rem; }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div> Ładowanie...
 </div>
 
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">LIRA<span>DJAG</span></div>
@@ -153,59 +116,96 @@ input:checked + .slider::before { transform: translateX(28px); }
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="adminPanel">
   <nav class="admin-nav">
     <div class="admin-nav-logo">LIRA<span>DJAG</span> · Panel Admina</div>
     <div class="admin-nav-right">
-      <span class="admin-nav-label">Zalogowany jako: Robert Gajda</span>
+      <span class="admin-nav-label">Robert Gajda</span>
       <button class="logout-btn" onclick="logout()">Wyloguj</button>
-      <a href="index.html" target="_blank" class="link-to-shop">→ Strona sklepu</a>
+      <a href="index.html" target="_blank" class="link-to-shop">→ Strona</a>
     </div>
   </nav>
 
   <div class="admin-content">
-    <div class="admin-title">Zarządzanie produktami</div>
-    <div class="admin-desc">Zmiany są widoczne dla klientów natychmiast po kliknięciu "Zapisz zmiany".</div>
-
-    <div id="productRows">
-      <!-- Generowane przez JS -->
+    <div class="admin-header">
+      <div>
+        <div class="admin-title">Zarządzanie produktami</div>
+        <div class="admin-desc">Zmiany widoczne dla klientów natychmiast po kliknięciu "Zapisz zmiany".</div>
+      </div>
+      <button class="add-btn" onclick="openAddModal()">+ Dodaj produkt</button>
     </div>
+    <div id="productRows"></div>
   </div>
 
   <div class="save-bar">
-    <div class="save-info">Pamiętaj aby zapisać zmiany przed zamknięciem strony.</div>
+    <div class="save-info">Pamiętaj zapisać zmiany przed zamknięciem.</div>
     <span class="status-msg" id="statusMsg"></span>
-    <button class="save-btn" id="saveBtn" onclick="saveChanges()">
-      💾 Zapisz zmiany
-    </button>
+    <button class="save-btn" id="saveBtn" onclick="saveChanges()">💾 Zapisz zmiany</button>
+  </div>
+</div>
+
+<!-- MODAL: Dodaj produkt -->
+<div class="modal-backdrop" id="addModal" style="display:none" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="modal-title">➕ Dodaj nowy produkt</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Emoji / Ikona</label>
+        <input type="text" id="new-icon" placeholder="🪵" maxlength="4">
+      </div>
+      <div class="field">
+        <label>Kolor akcentu (hex)</label>
+        <input type="text" id="new-color" placeholder="#f59e0b" maxlength="7">
+      </div>
+    </div>
+    <div class="field">
+      <label>Nazwa produktu</label>
+      <input type="text" id="new-name" placeholder="np. Brykiet drzewny">
+    </div>
+    <div class="field">
+      <label>ID (unikalny, bez spacji)</label>
+      <input type="text" id="new-id" placeholder="np. brykiet">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Jednostka sprzedaży</label>
+        <input type="text" id="new-unit" placeholder="np. tona">
+      </div>
+      <div class="field">
+        <label>Cena startowa (zł)</label>
+        <input type="number" id="new-price" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="field">
+      <label>Krótki opis</label>
+      <input type="text" id="new-desc" placeholder="np. Wysokiej jakości brykiet...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Anuluj</button>
+      <button class="btn-confirm" onclick="addProduct()">Dodaj produkt</button>
+    </div>
   </div>
 </div>
 
 <script>
-  // ── CONFIG ──
   const WORKER_URL = 'https://liradjag-api.fhuliradjagskladopalu.workers.dev';
   let sessionToken = null;
+  let products = [];
 
-  const PRODUCTS = [
-    { id: 'pellet',   name: 'Pellet drzewny',   icon: '🌿', unit: 'paleta (1050 kg)' },
-    { id: 'kamienny', name: 'Węgiel kamienny',   icon: '⚫', unit: 'tona' },
-    { id: 'groszek',  name: 'Eko-groszek',       icon: '🔥', unit: 'tona' },
-    { id: 'brykiet',  name: 'Brykiet drzewny',   icon: '🪵', unit: 'tona' },
+  const DEFAULT_PRODUCTS = [
+    { id: 'pellet',   name: 'Pellet drzewny',  icon: '🌿', unit: 'paleta', color: '#22c55e', desc: 'Certyfikowany pellet drzewny ENplus A1.', dostepny: true, cena: 1365 },
+    { id: 'kamienny', name: 'Węgiel kamienny',  icon: '⚫', unit: 'tona',   color: '#94a3b8', desc: 'Węgiel kamienny orzech/kostka.',           dostepny: true, cena: 1150 },
+    { id: 'groszek',  name: 'Eko-groszek',      icon: '🔥', unit: 'tona',   color: '#f59e0b', desc: 'Drobnoziarnisty węgiel do kotłów z podajnikiem.', dostepny: true, cena: 1050 },
+    { id: 'brykiet',  name: 'Brykiet drzewny',  icon: '🪵', unit: 'tona',   color: '#a16207', desc: 'Brykiet drzewny do kominków i kotłów.',    dostepny: false, cena: 0 },
   ];
 
-  let currentData = {};
-
-  // ── LOGIN ──
   async function login() {
     const pass = document.getElementById('passwordInput').value;
     const btn = document.querySelector('.login-btn');
-    btn.textContent = 'Logowanie...';
-    btn.disabled = true;
+    btn.textContent = 'Logowanie...'; btn.disabled = true;
     try {
       const res = await fetch(`${WORKER_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pass })
       });
       const data = await res.json();
@@ -219,110 +219,156 @@ input:checked + .slider::before { transform: translateX(28px); }
         document.getElementById('passwordInput').value = '';
       }
     } catch(e) {
-      document.getElementById('loginError').textContent = 'Błąd połączenia. Sprawdź internet.';
+      document.getElementById('loginError').textContent = 'Błąd połączenia.';
       document.getElementById('loginError').style.display = 'block';
     }
-    btn.textContent = 'Zaloguj się';
-    btn.disabled = false;
+    btn.textContent = 'Zaloguj się'; btn.disabled = false;
   }
 
   function logout() {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('passwordInput').value = '';
+    sessionToken = null; products = [];
   }
 
-  // ── LOAD DATA ──
   async function loadData() {
     showLoading(true);
     try {
       const res = await fetch(`${WORKER_URL}/produkty`);
-      currentData = await res.json();
-      renderProducts();
+      const raw = await res.json();
+      // Nowy format: {id: {name, icon, unit, color, desc, dostepny, cena}}
+      // Stary format: {id: {dostepny, cena}} — migrujemy do nowego
+      if (raw && typeof raw === 'object') {
+        const firstVal = Object.values(raw)[0];
+        if (firstVal && firstVal.name) {
+          // Nowy format
+          products = Object.entries(raw).map(([id, v]) => ({ id, ...v }));
+        } else {
+          // Stary format — migrujemy z domyślnymi metadanymi
+          products = DEFAULT_PRODUCTS.map(def => ({
+            ...def,
+            ...(raw[def.id] || {}),
+          }));
+        }
+      } else {
+        products = [...DEFAULT_PRODUCTS];
+      }
     } catch(e) {
-      showStatus('Błąd połączenia z bazą danych. Sprawdź internet.', 'error');
+      products = [...DEFAULT_PRODUCTS];
+      showStatus('Błąd połączenia — załadowano dane domyślne.', 'error');
     }
+    renderProducts();
     showLoading(false);
   }
 
-  // ── RENDER ──
   function renderProducts() {
     const container = document.getElementById('productRows');
-    container.innerHTML = PRODUCTS.map(p => {
-      const data = currentData[p.id] || { dostepny: true, cena: 0 };
-      return `
-        <div class="product-row">
-          <div class="product-row-icon">${p.icon}</div>
-          <div class="product-row-info">
-            <div class="product-row-name">${p.name}</div>
-            <div class="product-row-id">ID: ${p.id}</div>
-          </div>
-          <div class="price-group">
-            <div class="price-label">Cena (zł / ${p.unit})</div>
-            <div class="price-input-wrap">
-              <input class="price-input" type="number" id="price-${p.id}" value="${data.cena}" min="0" step="1">
-              <span class="price-unit">zł</span>
-            </div>
-          </div>
-          <div class="toggle-group">
-            <div class="toggle-label-text ${data.dostepny ? 'on' : 'off'}" id="label-${p.id}">
-              ${data.dostepny ? '● DOSTĘPNY' : '● NIEDOSTĘPNY'}
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="toggle-${p.id}" ${data.dostepny ? 'checked' : ''} onchange="updateLabel('${p.id}')">
-              <span class="slider"></span>
-            </label>
+    if (!products.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">Brak produktów. Kliknij "+ Dodaj produkt".</div></div>`;
+      return;
+    }
+    container.innerHTML = products.map((p, i) => `
+      <div class="product-row" id="row-${i}">
+        <div class="product-icon">${p.icon}</div>
+        <div>
+          <div class="product-info-name">${p.name}</div>
+          <div class="product-info-meta">ID: ${p.id} · ${p.unit}</div>
+        </div>
+        <div class="price-group">
+          <div class="price-label">Cena / ${p.unit}</div>
+          <div class="price-input-wrap">
+            <input class="price-input" type="number" id="price-${i}" value="${p.cena}" min="0" step="1">
+            <span class="price-unit">zł</span>
           </div>
         </div>
-      `;
-    }).join('');
+        <div class="toggle-group">
+          <div class="toggle-label-text ${p.dostepny ? 'on' : 'off'}" id="label-${i}">${p.dostepny ? '● DOSTĘPNY' : '● NIEDOSTĘPNY'}</div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-${i}" ${p.dostepny ? 'checked' : ''} onchange="updateLabel(${i})">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <button class="delete-btn" onclick="deleteProduct(${i})">🗑 Usuń</button>
+      </div>
+    `).join('');
   }
 
-  function updateLabel(id) {
-    const checked = document.getElementById('toggle-' + id).checked;
-    const label = document.getElementById('label-' + id);
+  function updateLabel(i) {
+    const checked = document.getElementById('toggle-' + i).checked;
+    const label = document.getElementById('label-' + i);
     label.textContent = checked ? '● DOSTĘPNY' : '● NIEDOSTĘPNY';
     label.className = 'toggle-label-text ' + (checked ? 'on' : 'off');
   }
 
-  // ── SAVE ──
+  function deleteProduct(i) {
+    if (!confirm(`Usunąć "${products[i].name}"?`)) return;
+    products.splice(i, 1);
+    renderProducts();
+  }
+
+  function openAddModal() {
+    document.getElementById('addModal').style.display = 'flex';
+    document.getElementById('new-name').focus();
+  }
+  function closeAddModal() {
+    document.getElementById('addModal').style.display = 'none';
+    ['new-icon','new-color','new-name','new-id','new-unit','new-price','new-desc'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  function addProduct() {
+    const name  = document.getElementById('new-name').value.trim();
+    const id    = document.getElementById('new-id').value.trim().replace(/\s+/g, '_').toLowerCase();
+    const icon  = document.getElementById('new-icon').value.trim() || '📦';
+    const color = document.getElementById('new-color').value.trim() || '#e85c0d';
+    const unit  = document.getElementById('new-unit').value.trim() || 'tona';
+    const cena  = parseInt(document.getElementById('new-price').value) || 0;
+    const desc  = document.getElementById('new-desc').value.trim();
+
+    if (!name || !id) { alert('Podaj nazwę i ID produktu.'); return; }
+    if (products.find(p => p.id === id)) { alert(`ID "${id}" już istnieje.`); return; }
+
+    products.push({ id, name, icon, color, unit, cena, desc, dostepny: true });
+    renderProducts();
+    closeAddModal();
+  }
+
+  function collectCurrentValues() {
+    return products.map((p, i) => ({
+      ...p,
+      cena: parseInt(document.getElementById('price-' + i)?.value) || p.cena,
+      dostepny: document.getElementById('toggle-' + i)?.checked ?? p.dostepny,
+    }));
+  }
+
   async function saveChanges() {
     const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Zapisuję...';
+    btn.disabled = true; btn.textContent = '⏳ Zapisuję...';
     showStatus('', '');
 
-    const newData = {};
-    PRODUCTS.forEach(p => {
-      newData[p.id] = {
-        dostepny: document.getElementById('toggle-' + p.id).checked,
-        cena: parseInt(document.getElementById('price-' + p.id).value) || 0
-      };
-    });
+    const updated = collectCurrentValues();
+    // Zapisz jako obiekt {id: {...dane}}
+    const payload = {};
+    updated.forEach(p => { payload[p.id] = { name: p.name, icon: p.icon, unit: p.unit, color: p.color, desc: p.desc || '', dostepny: p.dostepny, cena: p.cena }; });
 
     try {
       const res = await fetch(`${WORKER_URL}/produkty`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Token': sessionToken
-        },
-        body: JSON.stringify(newData)
+        headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionToken },
+        body: JSON.stringify(payload)
       });
-
       if (res.ok) {
-        currentData = newData;
-        showStatus('✅ Zmiany zapisane! Strona klientów zaktualizowana.', 'success');
+        products = updated;
+        showStatus('✅ Zapisano! Strona klientów zaktualizowana.', 'success');
       } else {
         showStatus('❌ Błąd zapisu. Spróbuj ponownie.', 'error');
       }
     } catch(e) {
-      showStatus('❌ Błąd połączenia. Sprawdź internet.', 'error');
+      showStatus('❌ Błąd połączenia.', 'error');
     }
 
-    btn.disabled = false;
-    btn.innerHTML = '💾 Zapisz zmiany';
-    setTimeout(() => showStatus('', ''), 4000);
+    btn.disabled = false; btn.innerHTML = '💾 Zapisz zmiany';
+    setTimeout(() => showStatus('', ''), 5000);
   }
 
   function showStatus(msg, type) {
@@ -330,12 +376,10 @@ input:checked + .slider::before { transform: translateX(28px); }
     el.textContent = msg;
     el.className = 'status-msg' + (type ? ' ' + type : '');
   }
-
   function showLoading(show) {
     document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
   }
 
-  // Auto-hide loading on start
   document.getElementById('loadingOverlay').style.display = 'none';
 </script>
 </body>

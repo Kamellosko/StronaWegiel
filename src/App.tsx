@@ -1,33 +1,12 @@
 import { useState, useEffect } from "react"
-import { Badge } from "@/components/ui/badge"
-
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 const WORKER_URL = 'https://liradjag-api.fhuliradjagskladopalu.workers.dev'
 
-const PRODUCTS_DEF = [
-  {
-    id: 'pellet', name: 'Pellet drzewny', icon: '🌿', badge: 'POLECANY', unit: 'paleta',
-    desc: 'Certyfikowany pellet drzewny ENplus A1. Wysoka wartość opałowa, niskie emisje.',
-    detail: '1 paleta = ok. 1050 kg worków 15 kg.',
-    specs: [['Frakcja', '6–8 mm'], ['Opakowanie', 'worki 15 kg'], ['Waga palety', 'ok. 1050 kg']],
-    color: '#22c55e'
-  },
-  {
-    id: 'kamienny', name: 'Węgiel kamienny', icon: '⚫', badge: null, unit: 'tona',
-    desc: 'Węgiel kamienny orzech/kostka. Wysoka kaloryczność i długie palenie.',
-    detail: 'Odpowiedni do kotłów zasypowych i kominków.',
-    specs: [['Frakcja', 'orzech / kostka'], ['Opakowanie', 'luz']],
-    color: '#94a3b8'
-  },
-  {
-    id: 'groszek', name: 'Eko-groszek', icon: '🔥', badge: null, unit: 'tona',
-    desc: 'Drobnoziarnisty węgiel do kotłów automatycznych z podajnikiem.',
-    detail: 'Niskie zasiarcowanie, bardzo dobra sprawność spalania.',
-    specs: [['Frakcja', '5–25 mm'], ['Opakowanie', 'luz / big bag']],
-    color: '#f59e0b'
-  },
-
+const PRODUCTS_FALLBACK = [
+  { id: 'pellet',   name: 'Pellet drzewny',  icon: '🌿', unit: 'paleta', color: '#22c55e', desc: 'Certyfikowany pellet drzewny ENplus A1. Wysoka wartość opałowa, niskie emisje.', dostepny: true, cena: 1365 },
+  { id: 'kamienny', name: 'Węgiel kamienny',  icon: '⚫', unit: 'tona',   color: '#94a3b8', desc: 'Węgiel kamienny orzech/kostka. Wysoka kaloryczność i długie palenie.',           dostepny: true, cena: 1150 },
+  { id: 'groszek',  name: 'Eko-groszek',      icon: '🔥', unit: 'tona',   color: '#f59e0b', desc: 'Drobnoziarnisty węgiel do kotłów automatycznych z podajnikiem.',               dostepny: true, cena: 1050 },
 ]
 
 const DELIVERY_ZONES = [
@@ -47,8 +26,16 @@ const FAQ = [
   { q: 'Czy ceny na stronie są aktualne?', a: 'Ceny są orientacyjne i aktualizowane na bieżąco. Przed zamówieniem zawsze potwierdzamy aktualną cenę telefonicznie.' },
 ]
 
-type ProductData = { dostepny: boolean; cena: number }
-type ProductsRecord = Record<string, ProductData>
+type Product = {
+  id: string
+  name: string
+  icon: string
+  unit: string
+  color: string
+  desc: string
+  dostepny: boolean
+  cena: number
+}
 
 function useScrolled() {
   const [scrolled, setScrolled] = useState(false)
@@ -243,9 +230,8 @@ function TrustBar() {
   )
 }
 
-function ProductCard({ p, data }: { p: typeof PRODUCTS_DEF[0]; data: ProductData }) {
+function ProductCard({ p }: { p: Product }) {
   const [hovered, setHovered] = useState(false)
-  const available = data.dostepny
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -256,49 +242,29 @@ function ProductCard({ p, data }: { p: typeof PRODUCTS_DEF[0]; data: ProductData
         border: `1px solid ${hovered ? p.color + '40' : 'rgba(255,255,255,0.07)'}`,
         transform: hovered ? 'translateY(-4px)' : 'none',
         boxShadow: hovered ? `0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px ${p.color}20` : 'none',
-        opacity: available ? 1 : 0.6,
+        opacity: p.dostepny ? 1 : 0.6,
       }}
     >
-      {/* Top accent */}
       <div className="h-1 w-full transition-all duration-300" style={{
         background: `linear-gradient(90deg, ${p.color}, ${p.color}80)`,
         opacity: hovered ? 1 : 0.4,
       }} />
 
       <div className="p-6 flex flex-col flex-1">
-        {p.badge && (
-          <Badge className="self-start mb-4 text-xs font-bold tracking-wider" style={{ background: '#f59e0b', color: '#000', border: 'none' }}>
-            {p.badge}
-          </Badge>
-        )}
-
         <div className="text-4xl mb-4">{p.icon}</div>
         <h3 className="text-xl font-black text-white mb-2" style={{ fontFamily: 'Georgia, serif', letterSpacing: '-0.01em' }}>{p.name}</h3>
-        <p className="text-sm leading-relaxed mb-1 flex-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{p.desc}</p>
-        <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>{p.detail}</p>
+        <p className="text-sm leading-relaxed mb-4 flex-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{p.desc}</p>
 
-        {/* Specs */}
-        <div className="mb-4 space-y-1">
-          {p.specs.map(([k, v]) => (
-            <div key={k} className="flex justify-between text-xs py-1" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)' }}>{k}</span>
-              <span style={{ color: 'rgba(255,255,255,0.7)' }}>{v}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Availability */}
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-2 h-2 rounded-full" style={{ background: available ? '#22c55e' : '#ef4444', boxShadow: available ? '0 0 6px #22c55e' : 'none' }} />
-          <span className="text-xs font-bold tracking-wide uppercase" style={{ color: available ? '#22c55e' : '#ef4444' }}>
-            {available ? 'Dostępny' : 'Chwilowo niedostępny'}
+          <div className="w-2 h-2 rounded-full" style={{ background: p.dostepny ? '#22c55e' : '#ef4444', boxShadow: p.dostepny ? '0 0 6px #22c55e' : 'none' }} />
+          <span className="text-xs font-bold tracking-wide uppercase" style={{ color: p.dostepny ? '#22c55e' : '#ef4444' }}>
+            {p.dostepny ? 'Dostępny' : 'Chwilowo niedostępny'}
           </span>
         </div>
 
-        {/* Price */}
         <div className="mt-auto">
           <div className="text-3xl font-black" style={{ color: '#f59e0b', fontFamily: 'Georgia, serif' }}>
-            {data.cena.toLocaleString('pl-PL')} zł
+            {p.cena.toLocaleString('pl-PL')} zł
           </div>
           <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>/ {p.unit} brutto · cena orientacyjna</div>
           <div className="text-xs mt-2 px-3 py-1.5 rounded" style={{ background: 'rgba(232,92,13,0.1)', color: '#e85c0d', border: '1px solid rgba(232,92,13,0.2)' }}>
@@ -311,17 +277,22 @@ function ProductCard({ p, data }: { p: typeof PRODUCTS_DEF[0]; data: ProductData
 }
 
 function Products() {
-  const [products, setProducts] = useState<ProductsRecord | null>(null)
-  const [_error, setError] = useState(false)
+  const [products, setProducts] = useState<Product[] | null>(null)
 
   useEffect(() => {
     fetch(`${WORKER_URL}/produkty`)
       .then(r => r.json())
-      .then(setProducts)
-      .catch(() => {
-        setProducts({ pellet:{dostepny:true,cena:1365}, kamienny:{dostepny:true,cena:1150}, groszek:{dostepny:true,cena:1050} })
-        setError(true)
+      .then((raw: Record<string, Product>) => {
+        const firstVal = Object.values(raw)[0]
+        if (firstVal?.name) {
+          // Nowy format z metadanymi
+          setProducts(Object.entries(raw).map(([pid, v]) => ({ ...v, id: pid })))
+        } else {
+          // Stary format — uzupełnij z fallbacka
+          setProducts(PRODUCTS_FALLBACK.map(def => ({ ...def, ...(raw[def.id] || {}) })))
+        }
       })
+      .catch(() => setProducts(PRODUCTS_FALLBACK))
   }, [])
 
   return (
@@ -340,13 +311,13 @@ function Products() {
 
         {!products ? (
           <div className="flex items-center justify-center py-24 gap-4" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            <div className="w-8 h-8 rounded-full border-2 border-t-[#e85c0d]" style={{ borderColor: 'rgba(255,255,255,0.1) #e85c0d rgba(255,255,255,0.1) rgba(255,255,255,0.1)', animation: 'spin 0.8s linear infinite' }} />
+            <div className="w-8 h-8 rounded-full border-2" style={{ borderColor: 'rgba(255,255,255,0.1) #e85c0d rgba(255,255,255,0.1) rgba(255,255,255,0.1)', animation: 'spin 0.8s linear infinite' }} />
             Ładowanie produktów...
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-            {PRODUCTS_DEF.map(p => (
-              <ProductCard key={p.id} p={p} data={products[p.id] || { dostepny: true, cena: 0 }} />
+            {products.map(p => (
+              <ProductCard key={p.id} p={p} />
             ))}
           </div>
         )}
