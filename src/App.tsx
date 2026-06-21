@@ -70,36 +70,75 @@ function Nav() {
     { href: '#kontakt', label: 'Kontakt' },
   ]
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0f0f0f]/95 backdrop-blur-md border-b border-white/8 shadow-xl' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#hero" className="font-black text-xl tracking-widest text-white" style={{ fontFamily: 'Georgia, serif' }}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#0a0a0a]/98 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl' : 'bg-transparent'}`}>
+      <div className="max-w-7xl mx-auto px-6 h-[68px] flex items-center justify-between gap-8">
+        {/* Logo */}
+        <a href="#hero" className="font-black text-xl tracking-widest text-white shrink-0" style={{ fontFamily: 'Georgia, serif', letterSpacing: '0.12em' }}>
           LIRA<span style={{ color: '#e85c0d' }}>DJAG</span>
         </a>
-        {/* Desktop */}
-        <ul className="hidden md:flex gap-8">
+
+        {/* Desktop nav — centered */}
+        <ul className="hidden md:flex items-center gap-1 flex-1 justify-center">
           {links.map(l => (
             <li key={l.href}>
-              <a href={l.href} className="text-sm font-medium text-white/60 hover:text-white transition-colors tracking-wide">{l.label}</a>
+              <a
+                href={l.href}
+                className="relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 group"
+                style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'white')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+              >
+                <span className="relative z-10">{l.label}</span>
+                <span className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(255,255,255,0.05)' }} />
+              </a>
             </li>
           ))}
         </ul>
-        <a href="tel:+48694232935" className="hidden md:flex items-center gap-2 font-bold text-sm px-4 py-2 rounded border border-[#e85c0d] text-[#e85c0d] hover:bg-[#e85c0d] hover:text-white transition-all">
+
+        {/* Desktop CTA */}
+        <a
+          href="tel:+48694232935"
+          className="hidden md:flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-lg transition-all duration-200 shrink-0"
+          style={{ background: '#e85c0d', color: 'white', fontFamily: 'Inter, sans-serif', boxShadow: '0 4px 14px rgba(232,92,13,0.35)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#d14f09'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#e85c0d'; (e.currentTarget as HTMLAnchorElement).style.transform = 'none' }}
+        >
           📞 694 232 935
         </a>
+
         {/* Mobile burger */}
-        <button className="md:hidden text-white text-2xl" onClick={() => setOpen(!open)}>
-          {open ? '✕' : '☰'}
+        <button
+          className="md:hidden flex flex-col gap-1.5 p-2 rounded-md transition-colors"
+          onClick={() => setOpen(!open)}
+          style={{ color: 'white' }}
+        >
+          <span className="block w-6 h-0.5 bg-white transition-all duration-200" style={{ transform: open ? 'rotate(45deg) translate(4px, 4px)' : 'none' }} />
+          <span className="block w-6 h-0.5 bg-white transition-all duration-200" style={{ opacity: open ? 0 : 1 }} />
+          <span className="block w-6 h-0.5 bg-white transition-all duration-200" style={{ transform: open ? 'rotate(-45deg) translate(4px, -4px)' : 'none' }} />
         </button>
       </div>
+
       {/* Mobile menu */}
-      {open && (
-        <div className="md:hidden bg-[#1a1a1a] border-t border-white/10 px-6 py-4 flex flex-col gap-4">
+      <div className="md:hidden overflow-hidden transition-all duration-300" style={{ maxHeight: open ? '300px' : '0', background: '#111' }}>
+        <div className="px-6 py-4 flex flex-col gap-1 border-t border-white/[0.06]">
           {links.map(l => (
-            <a key={l.href} href={l.href} className="text-white/70 font-medium text-base" onClick={() => setOpen(false)}>{l.label}</a>
+            <a
+              key={l.href}
+              href={l.href}
+              className="px-3 py-3 rounded-lg font-medium text-sm transition-colors"
+              style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'Inter, sans-serif' }}
+              onClick={() => setOpen(false)}
+              onMouseEnter={e => (e.currentTarget.style.color = 'white')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+            >
+              {l.label}
+            </a>
           ))}
-          <a href="tel:+48694232935" className="font-bold text-[#e85c0d] text-base">📞 694 232 935</a>
+          <a href="tel:+48694232935" className="mt-2 px-3 py-3 rounded-lg font-bold text-sm" style={{ color: '#e85c0d', background: 'rgba(232,92,13,0.1)' }}>
+            📞 694 232 935
+          </a>
         </div>
-      )}
+      </div>
     </nav>
   )
 }
@@ -190,12 +229,13 @@ function TrustBar() {
     { icon: '⭐', text: 'Ponad 15 lat na rynku' },
   ]
   return (
-    <div style={{ background: '#161616', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap gap-x-8 gap-y-2 justify-center">
+    <div style={{ background: '#131313', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="max-w-7xl mx-auto px-6 py-3.5 flex flex-wrap gap-x-6 gap-y-2 justify-center">
         {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            <span>{item.icon}</span>
+          <div key={i} className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>
+            <span className="text-sm">{item.icon}</span>
             <span>{item.text}</span>
+            {i < items.length - 1 && <span className="ml-6 hidden sm:block" style={{ color: 'rgba(255,255,255,0.12)' }}>·</span>}
           </div>
         ))}
       </div>
@@ -322,13 +362,19 @@ function Products() {
 
 function CtaBanner() {
   return (
-    <div style={{ background: 'linear-gradient(135deg, #e85c0d 0%, #c94d09 100%)' }}>
-      <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div style={{ background: 'linear-gradient(135deg, #c94d09 0%, #a83e07 100%)', position: 'relative', overflow: 'hidden' }}>
+      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+      <div className="relative max-w-7xl mx-auto px-6 py-14 flex flex-col md:flex-row items-center justify-between gap-8">
         <div>
-          <h3 className="text-3xl font-black text-white mb-1" style={{ fontFamily: 'Georgia, serif' }}>Zainteresowany? Zadzwoń!</h3>
-          <p style={{ color: 'rgba(255,255,255,0.75)' }}>Odpowiemy na wszystkie pytania i ustalimy termin dostawy.</p>
+          <p className="text-xs font-bold tracking-[0.2em] uppercase mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Skontaktuj się z nami</p>
+          <h3 className="text-3xl font-black text-white mb-2" style={{ fontFamily: 'Georgia, serif', letterSpacing: '-0.01em' }}>Zainteresowany? Zadzwoń!</h3>
+          <p className="text-base" style={{ color: 'rgba(255,255,255,0.7)' }}>Odpowiemy na wszystkie pytania i ustalimy termin dostawy.</p>
         </div>
-        <a href="tel:+48694232935" className="inline-block font-black text-xl px-8 py-4 rounded-lg transition-all hover:-translate-y-1 hover:shadow-2xl whitespace-nowrap" style={{ background: '#fff', color: '#e85c0d' }}>
+        <a
+          href="tel:+48694232935"
+          className="inline-flex items-center gap-3 font-black text-lg px-8 py-4 rounded-xl transition-all duration-200 whitespace-nowrap hover:-translate-y-1"
+          style={{ background: 'white', color: '#c94d09', boxShadow: '0 8px 30px rgba(0,0,0,0.25)' }}
+        >
           📞 694 232 935
         </a>
       </div>
@@ -510,13 +556,14 @@ function Footer() {
 
 export default function App() {
   return (
-    <div className="min-h-screen" style={{ background: '#0f0f0f' }}>
+    <div className="min-h-screen" style={{ background: '#0f0f0f', fontFamily: 'Inter, sans-serif' }}>
       <style>{`
         @keyframes float { from { transform: translateY(0px) } to { transform: translateY(-20px) } }
         @keyframes scrollDot { 0%,100% { transform: translateY(0); opacity:1 } 50% { transform: translateY(12px); opacity:0.3 } }
         @keyframes spin { to { transform: rotate(360deg) } }
         html { scroll-behavior: smooth }
         * { box-sizing: border-box }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
       `}</style>
       <Nav />
       <Hero />
